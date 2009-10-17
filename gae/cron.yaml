@@ -1,0 +1,4 @@
+cron:
+- description: 5 minutes sending mail
+  url: /sendmail
+  schedule: every 5 minutes
