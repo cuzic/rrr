@@ -71,7 +71,7 @@ def send_mail conf, title, message
     auth = [username, conf["password"], :login]
   end
 
-  smtp.start("gyao.ne.jp", *auth) do |smtp|
+  smtp.start(conf["host"], *auth) do |smtp|
     smtp.send_mail <<EOD , sender, *recipients
 From: <#{sender}>
 To: #{recipients.map{|addr| "<#{addr}>"}.join(", ")}
