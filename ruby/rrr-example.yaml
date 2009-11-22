@@ -1,7 +1,13 @@
+#submit_type: appspot
+submit_type: mail
+enable_tls: true
+# enable_tls ‚ğ true ‚Æ‚µ‚½ê‡ smtp/ssl ‚ğg—p‚Å‚«‚Ü‚·
+
 rrr:
   title: RD Remote Reservation
   password: your-rd-mail-password
-  argument: "KY VL AL"  
+  argument: "KY VL AL"
+# http://www.rd-style.com/network/explain2/0405.htm
 # ˜^‰æ—Dæ“xF‚Ó‚Â‚¤[YS]^Å—Dæ[YX]
 # ‰æ¿FSP[VS]^LP[VL]^A1[VA1]^A2[VA2]^DL[VD]
 # ‰¹¿FM1[A1]^M2[A2]^LPCM[AL]
@@ -16,6 +22,46 @@ rrr:
 # ˜^‰æ‚Ì‚è‚µ‚ëF“ü[ELY]^Ø[ELN]
 # ƒGƒ“ƒR[ƒ_[FTS[RT1]^VR[R1]
   
+mail:
+ -
+  host: mail.your-provider.net
+# port: 465
+# port: 587
+  port: 25
+  sender: your-name@your-provider.net
+  recipients:
+    - your-name@your-provider.net
+  username: your-name
+  password: your-password
+  enable_tls: true
+ -
+  host: smtp.live.com
+  port: 587
+  sender: your-name@hotmail.com
+  recipients:
+    - your-name@your-provider.net
+  username: your-name
+  password: your-password
+  enable_tls: true
+ -
+  host: smtp.gmx.com
+  port: 587
+  sender: your-name@gmx.com
+  recipients:
+    - your-name@your-provider.net
+  username: your-name
+  password: your-password
+  enable_tls: true
+ -
+  host: smtp.gmail.com
+  port: 465
+  sender: your-name@gmail.com
+  recipients:
+    - your-name@your-provider.net
+  username: your-name
+  password: your-password
+  enable_tls: true
+
 appspot:
   host: your-application-name.appspot.com
 
@@ -29,15 +75,24 @@ stations:
   ŠÖ¼ƒeƒŒƒr: "D081"
   ‚æ‚İ‚¤‚èƒeƒŒƒr: "D101"
   “Ç”„ƒeƒŒƒr: "D101"
-  ‚m‚g‚j‰q¯‘æˆê: BS1
-  ‚m‚g‚j‰q¯‘æ“ñ: BS2
-  BSDT103: BS3
-  BSDT141: BS4
-  BSDT151: BS5
-  BSDT161: BS6
-  BSDT171: BS7
-  BSDT181: BS8
-  ‚v‚n‚v‚n‚v: BS9
-  BSDT200: BS10
-  BSDT211: BS11
-  BSDT222: BS12
+  ‚m‚g‚j‘‡: "D011"
+  ‚m‚g‚j‹³ˆç: "D021"
+  ‚l‚a‚r–ˆ“ú•ú‘—: "D041"
+  –ˆ“úƒeƒŒƒr: "D041"
+  ‚`‚a‚bƒeƒŒƒr: "D061"
+  ƒeƒŒƒr‘åã: "D071"
+  ŠÖ¼ƒeƒŒƒr: "D081"
+  ‚æ‚İ‚¤‚èƒeƒŒƒr: "D101"
+  “Ç”„ƒeƒŒƒr: "D101"
+  ‚m‚g‚j‰q¯‘æˆê: "BS101"
+  ‚m‚g‚j‰q¯‘æ“ñ: "BS102"
+  BSDT103: "BS103"
+  BSDT141: "BS141"
+  BSDT151: "BS151"
+  BSDT161: "BS161"
+  BSDT171: "BS171"
+  BSDT181: "BS181"
+  ‚v‚n‚v‚n‚v: "BS191"
+  BSDT200: "BS200"
+  BSDT211: "BS211"
+  BSDT222: "BS222"
