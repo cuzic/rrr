@@ -1,3 +1,4 @@
+#!/usr/bin/env ruby
 # -*- encoding: cp932 -*-
 
 def wget url
@@ -39,7 +40,6 @@ def main
   index do |id|
     iepg = get_iepg id
     rrr iepg
-    break
   end
 end
 

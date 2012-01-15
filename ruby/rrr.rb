@@ -1,3 +1,5 @@
+#!/usr/bin/env ruby
+# -*- encoding: sjis -*-
 require 'net/http'
 require 'net/smtp'
 require 'yaml'
@@ -25,7 +27,7 @@ def main
   end
   title = iepg["program-title"]
   if $sdbm[title] then
-    raise "already reserved #{title}"
+    $stderr.puts "already reserved #{title}"
   end
   $sdbm[title] = %w(year month date).map{|k| iepg[k]}.join("")
   title, order = compose_message iepg
