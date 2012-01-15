@@ -2,22 +2,39 @@ require 'net/http'
 require 'net/smtp'
 require 'yaml'
 require 'nkf'
+require 'sdbm'
+
+at_exit do
+  $sdbm.close if $sdbm
+end
 
 def main
   dir = current_dir
 
   yamlfilename = File.join(dir, "rrr.yaml")
   $yaml = YAML::load(open(yamlfilename).read)
-
-  filename = ARGV.shift
-  iepg = read_file filename
+  if ARGV.empty? then
+    iepg = parse_iepg $stdin.read
+  else
+    filename = ARGV.join(" ")
+    iepg = read_file filename
+  end
+  $sdbm = SDBM.open("rrr.sdbm",0644)
+  $sdbm.delete_if do |k, value|
+    value < (Time.now - 60*60*24*7).strftime("%Y%m%d")
+  end
+  title = iepg["program-title"]
+  if $sdbm[title] then
+    raise "already reserved #{title}"
+  end
+  $sdbm[title] = %w(year month date).map{|k| iepg[k]}.join("")
   title, order = compose_message iepg
 
   case $yaml["submit_type"]
   when "appspot"
     submit_by_appspot title, order
   when "mail"
-    if $yaml["enable_tls"]
+    if RUBY_PLATFORM.include?("mswin32") and $yaml["enable_tls"]
       require 'rubygems'
       require 'tlsmail'
     end
@@ -28,39 +45,22 @@ end
 def submit_by_mail title, order
   mailconfigs = $yaml["mail"]
 
-  sended = false
-  loop do
-    mailconfigs.each do |conf|
-      begin
-        send_mail conf, title, order
-        sended = true
-#        $stderr.puts "success"
-#        $stderr.puts conf.inspect
-        break
-      rescue Exception => e
-#        $stderr.puts e.inspect
-#        $stderr.puts "failed"
-        next
-      end
+  mailconfigs.each do |conf|
+    begin
+      send_mail conf, title, order
+      return
+    rescue Exception => e
+      $stderr.puts e.inspect
+      $stderr.puts "failed"
+      next
     end
-    break if sended
-    $stderr.puts "cannot send mail"
-    exit
   end
 end
 
 def send_mail conf, title, message
-  smtp = nil
+  smtp = Net::SMTP.new(conf["host"], conf["port"])
   if conf["enable_tls"]
-    if RUBY_PLATFORM.include?("mswin32")
-      smtp = Net::SMTP.new(conf["host"], conf["port"])
-      smtp.enable_tls OpenSSL::SSL::VERIFY_NONE
-    else
-      smtp = Net::SMTP.new(conf["host"], conf["port"])
-      smtp.enable_tls OpenSSL::SSL::VERIFY_NONE
-    end
-  else
-    smtp = Net::SMTP.new(conf["host"], conf["port"])
+    smtp.enable_tls OpenSSL::SSL::VERIFY_NONE
   end
   sender = conf["sender"]
   username = conf["username"] || conf["sender"]
@@ -94,8 +94,13 @@ end
 
 def read_file filename
   text = IO.read filename
+  File.unlink filename
+  parse_iepg text
+end
+
+def parse_iepg iepg_text
   h = {}
-  text.scan(/(.+?): (.+)/) do |field, value|
+  iepg_text.scan(/(.+?): (.+)/) do |field, value|
     h[field] = value.chomp
   end
   h
@@ -106,12 +111,19 @@ def compose_message h
   pre_word = "open #{rd["password"]} prog add"
   day = "#{h["year"]}#{h["month"]}#{h["date"]}"
   duration = "#{h["start"]} #{h["end"]}".gsub(":","")
-  station = $yaml["stations"]
-  channel = station[h["station"]]
+  stations = $yaml["stations"]
+  station = h["station"]
+  channel = stations[station]
+  if channel.nil?
+    raise "cannot find CH #{station}"
+  end
   arg = rd["argument"]
+  title = h["program-title"]
 
-  order = [pre_word, day, duration, channel, arg].join(" ")
-  return nil, order
+  return "rrr #{day} #{duration} #{channel}", <<EOD
+#{pre_word} #{day} #{duration} #{channel} #{arg}
+#{title}
+EOD
 end
 
 def submit_by_appspot title, command
@@ -121,4 +133,6 @@ def submit_by_appspot title, command
                        "/regist?#{param}")
 end
 
-main
+if $0 == __FILE__ then
+  main
+end
