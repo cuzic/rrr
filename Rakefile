@@ -24,21 +24,29 @@ task :update do
   sh "python #{APPCFG} update gae"
 end
 
-#rule '.exe' => ['.rb'] do |t|
+rule '.exy' => ['.rb'] do |t|
+  pathname = Pathname.new(t.to_s)
+  dirname = pathname.dirname
+  basename = pathname.basename(".exy")
+  Dir.chdir(dirname) do
+    sh "mkexy -Ks #{basename}.rb"
+  end
+end
+
+rule '.exe' => ['.exy', '.rb'] do |t|
+  pathname = Pathname.new(t.source)
+  dirname = pathname.dirname
+  basename = pathname.basename(".exe")
+  Dir.chdir(dirname) do
+    sh "exerb #{t.source}"
+  end
+end
+
+#rule ".exe" => ".bat" do |t|
 #  pathname = Pathname.new(t.to_s)
 #  dirname = pathname.dirname
 #  basename = pathname.basename("exe")
 #  Dir.chdir(dirname) do
-#    sh "mkexy -Ks #{basename}rb"
-#    sh "exerb -k sjis -c gui #{basename}exy"
+#    sh "bat_to_exe_converter -bat #{pathname} -overwrite -save #{t.source}"
 #  end
 #end
-
-rule ".exe" => ".bat" do |t|
-  pathname = Pathname.new(t.to_s)
-  dirname = pathname.dirname
-  basename = pathname.basename("exe")
-  Dir.chdir(dirname) do
-    sh "bat_to_exe_converter -bat #{pathname} -overwrite -save #{t.source}"
-  end
-end
